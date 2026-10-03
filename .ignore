@@ -1,0 +1,15 @@
+# Android
+android-app/build/
+android-app/app/build/
+.gradle/
+local.properties
+.idea/
+*.apk
+
+# PlatformIO / Arduino
+.pio/
+.vscode/
+
+# Rahasia
+secrets.h
+*.env

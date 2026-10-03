@@ -1,0 +1,56 @@
+<resources>
+    <string name="app_name">Projector Remote</string>
+
+    <!-- Home -->
+    <string name="home_title">Kendali Suara</string>
+    <string name="mic_button">Tekan &amp; Ucapkan</string>
+    <string name="speech_result_label">Ucapan:</string>
+    <string name="command_result_label">Perintah terdeteksi:</string>
+    <string name="status_label">Status:</string>
+    <string name="status_initial">Siap. Tekan tombol mic dan ucapkan perintah.</string>
+    <string name="speak_prompt">Ucapkan perintah proyektor…</string>
+    <string name="speech_not_recognized">Pengenalan suara dibatalkan atau gagal.</string>
+    <string name="speech_empty">Tidak ada ucapan terdeteksi.</string>
+    <string name="speech_not_supported">Pengenalan suara tidak didukung di perangkat ini.</string>
+    <string name="speech_permission_denied">Izin mikrofon diperlukan untuk pengenalan suara.</string>
+    <string name="listening">Mendengarkan… ucapkan perintah.</string>
+    <string name="speech_no_match">Tidak ada ucapan yang dikenali. Coba lagi.</string>
+    <string name="speech_error_audio">Error audio.</string>
+    <string name="speech_error_client">Error klien.</string>
+    <string name="speech_error_network">Error jaringan. Periksa koneksi.</string>
+    <string name="speech_error_network_timeout">Jaringan timeout.</string>
+    <string name="speech_error_busy">Pengenalan sibuk. Coba lagi.</string>
+    <string name="speech_error_server">Error server pengenalan.</string>
+    <string name="speech_error_timeout">Waktu habis. Coba lagi.</string>
+
+    <!-- Settings -->
+    <string name="settings_title">Pengaturan</string>
+    <string name="settings_ip_hint">Masukkan alamat IP ESP32 (tanpa http://). Pastikan HP dan ESP32 dalam jaringan WiFi yang sama.</string>
+    <string name="settings_ip_placeholder">Contoh: 192.168.1.100</string>
+    <string name="settings_save">Simpan pengaturan</string>
+    <string name="settings_projector_profile_label">Pilih proyektor</string>
+    <string name="settings_form_hint">Isi nama, baudrate, dan perintah RS232 sesuai manual proyektor. Simpan untuk mendaftarkan atau memperbarui profil.</string>
+    <string name="settings_profile_name">Nama proyektor</string>
+    <string name="settings_delete_profile">Hapus profil ini</string>
+    <string name="settings_delete_profile_confirm">Hapus profil \"%1$s\"?</string>
+    <string name="settings_delete_profile_done">Profil dihapus.</string>
+    <string name="settings_custom_baud">Baudrate RS232 (mis. 9600)</string>
+    <string name="settings_custom_cmd_pon">Command Power ON (contoh: PON\r\n)</string>
+    <string name="settings_custom_cmd_poff">Command Power OFF</string>
+    <string name="settings_custom_cmd_vup">Command Volume Up</string>
+    <string name="settings_custom_cmd_vdown">Command Volume Down</string>
+
+    <!-- Debug -->
+    <string name="debug_title">Tabel Debug (Data Penelitian)</string>
+    <string name="debug_clear">Hapus Log</string>
+
+    <!-- Nav -->
+    <string name="nav_home">Home</string>
+    <string name="nav_settings">Setting</string>
+    <string name="nav_debug">Debug</string>
+    <string name="nav_about">Tentang</string>
+
+    <!-- About -->
+    <string name="about_title">Tentang Projek</string>
+    <string name="about_content">Sistem Kendali Proyektor Berbasis Internet of Things Menggunakan Speech Recognition dan Natural Language Processing pada Platform Android.\n\nProjek ini menggunakan:\n• ESP32 sebagai mikrokontroler yang terhubung ke komponen RS232 dan dipasangkan ke port proyektor.\n• Aplikasi Android sebagai remote dengan perintah ucapan.\n• Modul Speech Recognition Android untuk menangkap ucapan.\n• Metode NLP (Natural Language Processing) untuk menyaring dan mencocokkan kata kunci dengan perintah.\n\nPerintah yang didukung:\n• Aktifkan proyektor\n• Matikan proyektor\n• Volume naik\n• Volume turun\n\nAtur IP ESP32 di menu Setting sesuai dengan IP yang dikonfigurasi di firmware ESP32.</string>
+</resources>
