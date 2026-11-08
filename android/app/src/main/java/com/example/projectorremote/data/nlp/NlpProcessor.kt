@@ -23,11 +23,7 @@ import java.util.regex.Pattern
  */
 object NlpProcessor {
 
-    // >>> TEMPAT MENAMBAH VARIASI UCAPAN <<<
-    // Mau aplikasi mengerti ucapan baru? Cukup tambahkan katanya ke daftar di bawah.
-    //
-    // Untuk ON dan OFF, setiap kata kerja otomatis dikombinasikan dengan "proyektor".
-    // Contoh: "nyalakan" -> "nyalakan", "nyalakan proyektor", "proyektor nyalakan".
+    // TEMPAT MENAMBAH VARIASI UCAPAN
     private val keywordsProjectorOn = setOf(
         "aktifkan", "nyalakan", "hidupkan", "on", "nyala", "buka"
     ).flatMap { listOf(it, "${it} proyektor", "proyektor $it") }.toSet() +
@@ -38,9 +34,6 @@ object NlpProcessor {
     ).flatMap { listOf(it, "${it} proyektor", "proyektor $it") }.toSet() +
             setOf("proyektor mati", "matikan proyektor", "padamkan proyektor")
 
-    // Untuk volume, frasanya ditulis lengkap satu per satu.
-    // >>> PERINTAH BARU: buat daftar baru di bawah ini, contoh:
-    //     private val keywordsHdmi = setOf("hdmi", "input hdmi", "sumber hdmi")
     private val keywordsVolumeUp = setOf(
         "volume naik", "naikkan volume", "volume up", "perbesar volume",
         "volume besar", "tinggikan volume", "volume tambah"
