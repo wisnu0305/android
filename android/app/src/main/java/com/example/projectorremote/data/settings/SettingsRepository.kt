@@ -11,10 +11,24 @@ private const val KEY_ESP32_IP = "esp32_ip"
 private const val KEY_SAVED_PROFILES = "saved_profiles"
 private const val KEY_SELECTED_PROFILE_ID = "selected_profile_id"
 
+// IP bawaan jika pengguna belum mengisi IP ESP32 di Settings.
+// IP yang benar terlihat di Serial Monitor ESP32 setelah tersambung WiFi.
 private const val DEFAULT_IP = "192.168.1.100"
 
 /**
- * Profil proyektor yang disimpan pengguna (nama, baudrate, perintah RS232).
+ * PROFIL PROYEKTOR = isi formulir di tab Settings.
+ *
+ * Bahasa sederhananya: "buku contekan" perintah untuk satu merek/model proyektor.
+ * Disimpan di memori HP (SharedPreferences, dalam bentuk teks JSON), jadi tetap ada
+ * walau aplikasi ditutup. Pengguna bisa menyimpan beberapa profil dan memilih satu.
+ *
+ * >>> TEMPAT MENAMBAH KOLOM ISIAN BARU DI SETTINGS <<<
+ *   1. Tambah field di sini, contoh: val cmdHdmi: String,
+ *   2. Tambah juga di toJson() dan parseProfilesJson() di bawah (supaya ikut tersimpan).
+ *   3. Tambah kotak isian di res/layout/fragment_settings.xml.
+ *   4. Hubungkan di SettingsFragment.kt (isi & baca kotak) dan SettingsViewModel.saveSettings().
+ *
+ * Catatan: baud saat ini hanya disimpan; Arduino Uno selalu memakai 9600.
  */
 data class SavedProjectorProfile(
     val id: String,

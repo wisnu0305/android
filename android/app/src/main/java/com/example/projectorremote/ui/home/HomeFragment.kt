@@ -52,6 +52,7 @@ class HomeFragment : Fragment() {
             }
             _binding?.statusText?.text = msg
         }
+        // ALUR 2 — Google selesai mengubah suara menjadi teks. Teksnya ada di sini, lalu ke HomeViewModel untuk diartikan (NLP) dan dikirim ke esp32.
         override fun onResults(results: android.os.Bundle?) {
             val matches = results?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)
             val spoken = matches?.firstOrNull()
@@ -124,6 +125,13 @@ class HomeFragment : Fragment() {
     }
 
     /**
+     * ALUR 1 — MULAI MENDENGARKAN (Speech-to-Text).
+     *
+     * Dipanggil saat tombol mikrofon ditekan. Yang mengubah suara menjadi teks
+     * adalah layanan bawaan Android (Google SpeechRecognizer), bukan kode kita.
+     * Pengaturannya: bahasa Indonesia ("id-ID"), ambil 1 hasil terbaik saja.
+     * Biasanya butuh internet di HP.
+     *
      * Pengenalan suara tanpa UI sistem (tanpa dialog/overlay Google Assistant).
      * Hanya tampilan aplikasi kita yang terlihat; status "Mendengarkan..." di text kita.
      */

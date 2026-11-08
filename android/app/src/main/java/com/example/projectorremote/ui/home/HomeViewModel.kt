@@ -39,6 +39,14 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
         _isListening.value = value
     }
 
+    /**
+     * PUSAT ALUR APLIKASI: teks ucapan masuk, perintah keluar ke ESP32.
+     * Urutannya:
+     *   1. Teks diartikan oleh NlpProcessor menjadi sebuah Command.
+     *   2. Kalau tidak dikenali -> tampilkan "Perintah tidak dikenali", catat ke Debug, selesai.
+     *   3. Kalau dikenali -> lanjut kirim ke esp32 (lihat penjelasan di bawah).
+     *   4. Hasilnya (berhasil/gagal) ditampilkan di layar dan dicatat ke menu Debug.
+     */
     fun processSpeechAndSend(speechText: String) {
         viewModelScope.launch {
             val normalized = NlpProcessor.normalize(speechText)
@@ -56,7 +64,11 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
             val client = Esp32Client(baseUrl)
             val activeProfile = settingsRepo.getActiveProfile()
 
-            // Jika ada profil aktif, kirim command string dari profil via /commandRaw
+            // DUA JALUR PENGIRIMAN:
+            //  - Jalur CUSTOM   : jika profil proyektor aktif di Settings punya isian untuk perintah ini (misal "*pow=on#"), string itu dikirim apa adanya lewat /commandRaw. Ganti merek proyektor cukup ganti profil, tidak perlu upload ulang firmware.
+            //  - Jalur STANDAR  : jika isian profil kosong, kirim kode pendek (misal "PON") lewat /command, lalu Arduino Uno yang menerjemahkannya.
+            // >>> PERINTAH BARU yang juga bisa diisi di profil: tambahkan barisnya di sini,
+            //     contoh: Command.INPUT_HDMI -> activeProfile?.cmdHdmi
             val rawCommand = when (command) {
                 Command.PROJECTOR_ON -> activeProfile?.cmdPon
                 Command.PROJECTOR_OFF -> activeProfile?.cmdPoff
@@ -97,6 +109,7 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
+    // ALUR 7 — Setiap percobaan perintah dicatat ke database HP (Room) untuk data penelitian. Isinya tampil di tab Debug. Kolom baru di tabel Debug juga diisi di sini.
     private suspend fun logToDebug(
         rawSpeech: String,
         normalizedText: String,
