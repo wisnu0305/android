@@ -1,10 +1,23 @@
 // ===== ESP32 FIRMWARE: WiFi + HTTP + Forward ke Arduino Uno =====
+//
+// ALUR 5 — ESP32 SEBAGAI "JEMBATAN".
+// Bahasa sederhananya: ESP32 adalah server web kecil. HP membuka alamatnya lewat WiFi,
+// ESP32 membaca perintahnya, lalu meneruskannya ke Arduino Uno lewat kabel serial.
+// ESP32 tidak tahu cara bicara ke proyektor; itu tugas Arduino Uno.
+//
+// Daftar alamat (API) yang disediakan:
+//   GET /                         -> halaman info (cek apakah ESP32 hidup)
+//   GET /command?cmd=PON          -> perintah standar: PON, POFF, VUP, VDOWN
+//   GET /commandRaw?raw=*pow=on#  -> perintah mentah, diteruskan ke Uno sebagai "RAW:..."
+//   GET /setCustom?...            -> hanya membalas OK (profil diurus Android/Uno)
+//
+// Kabel ke Uno: GPIO17 (TX2) -> Uno pin 2, GPIO16 (RX2) <- Uno pin 3 lewat pembagi tegangan.
 #include <WiFi.h>
 #include <WebServer.h>
 
 // ====== KONFIGURASI WiFi ======
-const char* WIFI_SSID     = "RSUD_86x";      // SSID WiFi Anda
-const char* WIFI_PASSWORD = "perangkatbaru";  // Password WiFi Anda
+const char* WIFI_SSID     = "adaa";      // SSID WiFi Anda
+const char* WIFI_PASSWORD = "12345678";  // Password WiFi Anda
 
 // UART2 ESP32 untuk komunikasi ke Arduino Uno
 // GPIO16 = RX2, GPIO17 = TX2 pada DOIT ESP32 DevKit V1
@@ -101,6 +114,13 @@ void handleCommand() {
   String forward;
   String httpBody;
 
+  // Daftar perintah yang diterima ESP32. Selain ini ditolak dengan "Unknown cmd".
+  // >>> TEMPAT MENAMBAH PERINTAH BARU DI ESP32 <<<
+  // Salin satu blok "else if", contoh:
+  //   } else if (cmd == "HDMI") {
+  //     forward = "HDMI";
+  //     httpBody = "Forward: HDMI ke Arduino Uno";
+  // Kode harus sama dengan esp32Code di Android (Command.kt) dan di Uno.
   if (cmd == "PON") {
     forward = "PON";
     httpBody = "Forward: PON ke Arduino Uno";
@@ -126,7 +146,8 @@ void handleCommand() {
   // Kirim ke Uno
   sendToUno(forward);
 
-  // Opsional: baca balasan singkat dari Uno (mis. "OK PON", "ERR", dsb.)
+  // Tunggu balasan Uno maksimal 0,5 detik (mis. "OK PON" atau "ERR UNKNOWN CMD").
+  // Balasan ini ikut dikirim ke HP dan terlihat di tab Debug (kolom respons).
   String reply = readLineFromUno(500); // timeout 500 ms
   if (reply.length() > 0) {
     httpBody += "\nUNO_REPLY: " + reply;
@@ -248,7 +269,9 @@ void setup() {
   SerialUno.begin(9600, SERIAL_8N1, 16, 17);
   Serial.println("Serial ke Arduino Uno (UART2) init OK");
 
-  // WiFi
+  // WiFi mode STA = ESP32 ikut tersambung ke WiFi/hotspot yang sudah ada (bukan membuat WiFi sendiri).
+  // HP harus tersambung ke WiFi yang sama. IP ESP32 dicetak di Serial Monitor (115200 baud);
+  // IP itulah yang diisi di tab Settings aplikasi.
   WiFi.mode(WIFI_STA);
   WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
   Serial.print("Connecting to WiFi");
@@ -261,7 +284,8 @@ void setup() {
   Serial.print("IP: ");
   Serial.println(WiFi.localIP());
 
-  // Routing HTTP
+  // Routing HTTP: "jika alamat X dibuka, jalankan fungsi Y".
+  // >>> ENDPOINT/API BARU: tambahkan server.on("/alamat", namaFungsi); di sini.
   server.on("/", handleRoot);
   server.on("/command", handleCommand);
   server.on("/commandRaw", handleCommandRaw); // endpoint untuk custom command

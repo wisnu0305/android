@@ -9,12 +9,21 @@ import java.net.URLEncoder
 import java.util.concurrent.TimeUnit
 
 /**
- * Klien HTTP untuk mengirim perintah ke ESP32.
- * ESP32 diharapkan menjalankan server HTTP yang menerima GET/POST
- * dengan parameter command (kode perintah: PON, POFF, VUP, VDOWN).
+ * ALUR 4 — "KURIR" YANG MENGANTAR PERINTAH DARI HP KE ESP32 LEWAT WIFI.
+ *
+ * Bahasa sederhananya: HP "membuka alamat web" milik ESP32, sama seperti
+ * browser membuka sebuah halaman. Alamat yang dibuka itulah API-nya:
+ *   http://<ip-esp32>/command?cmd=PON          -> perintah standar (kode pendek)
+ *   http://<ip-esp32>/commandRaw?raw=*pow=on#  -> perintah mentah dari profil Settings
+ *   http://<ip-esp32>/setCustom?...            -> kirim profil (di ESP32 hanya dibalas OK)
+ *
+ * Library: OkHttp (permintaan HTTP GET) + Kotlin Coroutine (supaya layar tidak macet
+ * selama menunggu balasan).
  */
 class Esp32Client(private val baseUrl: String) {
 
+    // Batas tunggu 5 detik. Jika ESP32 mati atau beda jaringan WiFi, aplikasi
+    // menyerah setelah 5 detik dan menampilkan pesan "Gagal: ..." di layar.
     private val client = OkHttpClient.Builder()
         .connectTimeout(5, TimeUnit.SECONDS)
         .readTimeout(5, TimeUnit.SECONDS)

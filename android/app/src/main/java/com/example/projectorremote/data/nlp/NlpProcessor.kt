@@ -5,14 +5,29 @@ import java.util.Locale
 import java.util.regex.Pattern
 
 /**
- * Pemrosesan Natural Language untuk mencocokkan ucapan pengguna
- * dengan kata kunci perintah proyektor.
+ * ALUR 3 — "OTAK" APLIKASI: MENGARTIKAN KALIMAT MENJADI PERINTAH (NLP).
  *
- * Metode: normalisasi teks, tokenisasi, pencocokan kata kunci (keyword matching).
+ * Metode: rule-based keyword matching (pencocokan kata kunci berbasis aturan).
+ * Tidak memakai machine learning. Cara kerjanya mirip orang mencari kata
+ * penting di sebuah kalimat:
+ *   1. Normalisasi : kalimat dijadikan huruf kecil semua dan spasinya dirapikan,
+ *                    supaya "Nyalakan  PROYEKTOR" sama dengan "nyalakan proyektor".
+ *   2. Kamus       : setiap perintah punya daftar kata kunci (lihat di bawah).
+ *   3. Pencocokan  : kalimat dianggap cocok jika memuat frasa kata kunci,
+ *                    atau memuat semua kata dari frasa itu walau urutannya beda.
+ *   4. Prioritas   : dicek berurutan ON -> OFF -> VOLUME NAIK -> VOLUME TURUN.
+ *                    Yang pertama cocok langsung dipakai. Tidak ada yang cocok = UNKNOWN.
+ *
+ * Kelebihan: ringan, cepat, hasilnya pasti sama untuk kalimat yang sama, mudah dijelaskan.
+ * Keterbatasan: tidak paham negasi ("jangan nyalakan") dan bergantung pada hasil STT.
  */
 object NlpProcessor {
 
-    // Kata kunci untuk setiap perintah (bisa diperluas untuk variasi ucapan)
+    // >>> TEMPAT MENAMBAH VARIASI UCAPAN <<<
+    // Mau aplikasi mengerti ucapan baru? Cukup tambahkan katanya ke daftar di bawah.
+    //
+    // Untuk ON dan OFF, setiap kata kerja otomatis dikombinasikan dengan "proyektor".
+    // Contoh: "nyalakan" -> "nyalakan", "nyalakan proyektor", "proyektor nyalakan".
     private val keywordsProjectorOn = setOf(
         "aktifkan", "nyalakan", "hidupkan", "on", "nyala", "buka"
     ).flatMap { listOf(it, "${it} proyektor", "proyektor $it") }.toSet() +
@@ -23,6 +38,9 @@ object NlpProcessor {
     ).flatMap { listOf(it, "${it} proyektor", "proyektor $it") }.toSet() +
             setOf("proyektor mati", "matikan proyektor", "padamkan proyektor")
 
+    // Untuk volume, frasanya ditulis lengkap satu per satu.
+    // >>> PERINTAH BARU: buat daftar baru di bawah ini, contoh:
+    //     private val keywordsHdmi = setOf("hdmi", "input hdmi", "sumber hdmi")
     private val keywordsVolumeUp = setOf(
         "volume naik", "naikkan volume", "volume up", "perbesar volume",
         "volume besar", "tinggikan volume", "volume tambah"
@@ -42,6 +60,9 @@ object NlpProcessor {
         val normalized = normalize(speechText)
         if (normalized.isBlank()) return Command.UNKNOWN
 
+        // Dicek dari atas ke bawah; yang pertama cocok menang.
+        // >>> PERINTAH BARU: tambahkan satu baris, contoh:
+        //     matchesAny(normalized, keywordsHdmi) -> Command.INPUT_HDMI
         return when {
             matchesAny(normalized, keywordsProjectorOn) -> Command.PROJECTOR_ON
             matchesAny(normalized, keywordsProjectorOff) -> Command.PROJECTOR_OFF
@@ -61,6 +82,12 @@ object NlpProcessor {
         return t
     }
 
+    /**
+     * Cek apakah kalimat cocok dengan salah satu kata kunci.
+     * Cocok jika (a) frasa kata kunci ada di kalimat, atau
+     * (b) semua kata dari frasa itu ada di kalimat, urutan bebas.
+     * Contoh (b): "proyektor tolong nyalakan" tetap cocok dengan "nyalakan proyektor".
+     */
     private fun matchesAny(normalizedText: String, keywords: Set<String>): Boolean {
         return keywords.any { keyword ->
             normalizedText.contains(keyword) || keyword.split(" ").all { normalizedText.contains(it) }

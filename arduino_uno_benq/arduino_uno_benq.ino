@@ -1,4 +1,14 @@
 // ===== ARDUINO UNO: Terima perintah dari ESP32, kirim ke BenQ via RS232 =====
+//
+// ALUR 6 — ARDUINO UNO SEBAGAI "PENERJEMAH".
+// Bahasa sederhananya: Uno menerima kode pendek dari ESP32 (misal "PON"),
+// menerjemahkannya ke "bahasa" proyektor BenQ (misal "*pow=on#"),
+// lalu mengirimnya lewat modul RS232 (MAX3232) ke port RS232 proyektor.
+// Setelah itu Uno membalas ESP32 dengan "OK ..." atau "ERR UNKNOWN CMD".
+//
+// Uno memakai 2 jalur serial software:
+//   EspSerial   (pin 2 RX, pin 3 TX)   -> bicara dengan ESP32, 9600 baud
+//   BenQ_Serial (pin 10 RX, pin 11 TX) -> bicara dengan proyektor, 9600 baud
 #include <SoftwareSerial.h>
 
 // SoftwareSerial untuk komunikasi ke BenQ via RS232
@@ -15,6 +25,10 @@ SoftwareSerial EspSerial(2, 3); // RX, TX
 const long BAUD_RATE = 9600; // Baud Rate standar BenQ
 const char CR = '\r';        // Carriage Return (0x0D)
 
+// KAMUS PERINTAH PROYEKTOR BENQ (dari manual RS232 BenQ).
+// Format BenQ: diawali '*', diakhiri '#', dan dibungkus karakter Enter (CR) saat dikirim.
+// >>> PERINTAH BARU: tambahkan konstantanya di sini, contoh:
+//     const char* CMD_VOL_UP = "*vol=+#";
 // Perintah BenQ (tanpa CR, nanti dibungkus CR di fungsi kirim)
 const char* CMD_POWER_ON    = "*pow=on#";
 const char* CMD_POWER_OFF   = "*pow=off#";
@@ -80,7 +94,8 @@ void loop() {
     }
   }
 
-  // 2) (Opsional) Perintah manual dari PC via Serial Monitor
+  // 2) (Opsional) Perintah manual dari PC via Serial Monitor.
+  //    Berguna untuk tes proyektor tanpa HP/ESP32: ketik PROYEKTOR_ON lalu Enter.
   if (Serial.available()) {
     String in = Serial.readStringUntil('\n');
     in.trim();
@@ -108,7 +123,14 @@ void loop() {
   }
 }
 
-// Terjemahkan perintah teks dari ESP32 ke perintah BenQ
+// Terjemahkan perintah teks dari ESP32 ke perintah BenQ.
+// >>> TEMPAT MENAMBAH PERINTAH BARU DI UNO <<<
+// Salin satu blok "else if", contoh:
+//   } else if (in == "VUP") {
+//     sendCommand(CMD_VOL_UP);
+//     EspSerial.println("OK VUP");
+// Kode ("VUP") harus sama dengan yang dikirim ESP32 dan Android.
+// Perintah berawalan "RAW:" tidak diterjemahkan: isinya langsung dikirim ke proyektor.
 void handleCommandFromEsp(const String& in) {
   Serial.print("[HANDLE] Processing command: '");
   Serial.print(in);
